@@ -1,75 +1,96 @@
-from typing import TypedDict, Annotated
-from operator import add
-from langchain_core.messages import BaseMessage, HumanMessage
+# ==========================================
+# 文件：graph.py
+# 职责：负责 LangGraph 拓扑结构的组装、编译与运行入口
+# ==========================================
 
+from langchain_core.messages import HumanMessage
 from langgraph.graph import StateGraph, START, END
-# 核心引入：专门用来处理 tool_calls 的预置节点和路由逻辑
-from langgraph.prebuilt import ToolNode, tools_condition
 
-from tools import tools_list
-from agents import decision_agent
+# 导入状态定义
+from state import AgentState
 
-# ==========================================
-# 1. 状态定义 (State)
-# ==========================================
-class ForestryState(TypedDict):
-    messages: Annotated[list[BaseMessage], add]
-
-# ==========================================
-# 2. 构建图 (Graph)
-# ==========================================
-workflow = StateGraph(ForestryState)
-
-# ==========================================
-# 3. 注册节点 (Nodes)
-# ==========================================
-# 决策节点（调用我们刚才写的 decision_agent）
-workflow.add_node("agent", decision_agent)
-
-# 工具节点（传入 tools.py 里的 tools_list，它会自动根据 tool_calls 里的 name 去执行对应函数）
-tool_executor = ToolNode(tools_list)
-workflow.add_node("tools", tool_executor)
-
-# ==========================================
-# 4. 连线与路由 (Edges)
-# ==========================================
-workflow.add_edge(START, "agent")
-
-# 核心路由：这里代替了手工写 if/else 判断 response.tool_calls
-# tools_condition 内部逻辑：
-# 如果 agent 返回的 AIMessage 中有 tool_calls -> 走向 "tools"
-# 如果没有 tool_calls (说明准备输出最终报告了) -> 走向 END
-workflow.add_conditional_edges(
-    "agent",
-    tools_condition,
+# 导入所有独立的智能体节点
+from agents import (
+    planner_node,
+    executor_node,
+    critic_node,
+    finalizer_node
 )
 
-# 工具执行完毕后，必须把结果还给大脑，形成闭环
-workflow.add_edge("tools", "agent")
+def build_forestry_graph():
+    """
+    构建并编译林草综合防护多智能体有向带环图
+    """
+    print("\n⚙️ [System] 正在装载高阶混合推理架构 (Plan-Execute-Critic) ...")
+    
+    # 1. 初始化状态图
+    workflow = StateGraph(AgentState)
+
+    # 2. 注册所有核心节点
+    workflow.add_node("planner_node", planner_node)
+    workflow.add_node("executor_node", executor_node)
+    workflow.add_node("critic_node", critic_node)
+    workflow.add_node("finalizer_node", finalizer_node)
+
+    # 3. 极简拓扑连线 (基于 Command API 的动态路由架构)
+    # 唯一需要静态定义的只有入口边，其余全部由节点内部的 Command(goto=...) 动态接管
+    workflow.add_edge(START, "planner_node")
+
+    # 4. 编译图引擎
+    app = workflow.compile()
+    print("✅ [System] 架构编译完成，系统就绪！")
+    
+    return app
+
+# 暴露全局单例，供 FastAPI / Streamlit 等外部服务导入
+forestry_app = build_forestry_graph()
 
 # ==========================================
-# 5. 编译应用
-# ==========================================
-forestry_app = workflow.compile()
-
-# ==========================================
-# 测试运行
+# 生产级本地测试运行入口
 # ==========================================
 if __name__ == "__main__":
-    print("=== 林业多智能体系统启动 ===")
+    print("\n" + "="*50)
+    print("🌲 林草综合防护与应急响应多智能体系统 V2 启动")
+    print("="*50)
     
+    # 模拟巡林员上报的真实多模态场景
+    test_input = "这是昨天在林区拍到的生病的树木照片，图片路径是 ./test.jpg ，请给我一份详细的诊断和处置报告。"
+    
+    # 初始化纯净的全局状态
     initial_state = {
-        "messages": [HumanMessage(content="这是昨天在林区拍到的生病的树木照片，图片路径是 test.jpg ，请给我一份详细的诊断和处置报告。")]
+        "messages": [HumanMessage(content=test_input)],
+        "plan_loop_count": 0,
+        "execution_step_count": 0,
+        # 触发 Reducer 的重置机制，确保累加器环境干净
+        "completed_tasks": ["__RESET__"],
+        "task_results": {"__RESET__": "__RESET__"},
+        "reflections": ["__RESET__"]
     }
     
-    # 逐步流式打印，观察 Agent 如何自主循环
-    for event in forestry_app.stream(initial_state):
-        for node_name, node_state in event.items():
-            print(f"\n✅ [图流转] 节点 '{node_name}' 执行完毕。")
-            
-            latest_message = node_state["messages"][-1]
-            # 这里呼应你的第三张截图：如果有 tool_calls，说明大模型决定用工具了
-            if hasattr(latest_message, 'tool_calls') and latest_message.tool_calls:
-                print(f"   -> 大脑发出了工具调度指令: {[t['name'] for t in latest_message.tool_calls]}")
-            elif latest_message.content:
-                print(f"   -> 输出: {latest_message.content[:100]}...")
+    # 架构级硬性熔断配置 (对应 PDF 第 13 页)
+    config = {
+        "recursion_limit": 30 # 限制整个图的最大状态转移步数，防止 API 破产
+    }
+    
+    try:
+        # 使用 stream 流式输出，监控微循环与宏循环的流转过程
+        for event in forestry_app.stream(initial_state, config=config):
+            for node_name, node_state in event.items():
+                # 节点内部已有详细 print，此处可用于外部日志埋点
+                pass
+                
+        # 提取并打印最终报告
+        print("\n\n" + "🌟 "*20)
+        print("【系统最终输出公文】")
+        print("🌟 "*20)
+        
+        # 兼容不同版本的 langgraph stream 返回结构提取最终消息
+        if "finalizer_node" in event:
+            print(event["finalizer_node"]["messages"][-1].content)
+        else:
+            for k, v in event.items():
+                if "messages" in v:
+                     print(v["messages"][-1].content)
+                     
+    except Exception as e:
+        print(f"\n❌ [系统致命异常] 引擎触发硬性熔断或发生底层崩溃: {e}")
