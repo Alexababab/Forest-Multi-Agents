@@ -6,7 +6,19 @@ dist/
 wheels/
 *.egg-info
 
-# Virtual environments
-.venv
+# Virtual environments & Secrets
+.venv/
 .env
-database/chroma_db/
+
+# Database
+database/
+
+# Models & Large Files (架构师终极防御)
+models/
+*.bin
+*.safetensors
+*.h5
+*.pt
+
+# Frontend Cache
+tests/

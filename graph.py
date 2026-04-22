@@ -54,7 +54,7 @@ if __name__ == "__main__":
     print("="*50)
     
     # 模拟巡林员上报的真实多模态场景
-    test_input = "这是昨天在林区拍到的生病的树木照片，图片路径是 ./test.jpg ，请给我一份详细的诊断和处置报告。"
+    test_input = "这是昨天在林区拍到的生病的树木照片，图片路径是 ./tests/test.jpg ，请给我一份详细的诊断和处置报告。"
     
     # 初始化纯净的全局状态
     initial_state = {
@@ -85,12 +85,19 @@ if __name__ == "__main__":
         print("🌟 "*20)
         
         # 兼容不同版本的 langgraph stream 返回结构提取最终消息
+        # --- graph.py 测试运行入口修改 ---
+        # 兼容不同版本的 langgraph stream 返回结构提取最终消息
         if "finalizer_node" in event:
-            print(event["finalizer_node"]["messages"][-1].content)
+            last_msg = event["finalizer_node"]["messages"][-1]
+            # 防御性解析：判断是 AIMessage 对象还是原始 Tuple
+            report_text = last_msg.content if hasattr(last_msg, "content") else last_msg[1]
+            print(report_text)
         else:
             for k, v in event.items():
                 if "messages" in v:
-                     print(v["messages"][-1].content)
+                     last_msg = v["messages"][-1]
+                     report_text = last_msg.content if hasattr(last_msg, "content") else last_msg[1]
+                     print(report_text)
                      
     except Exception as e:
         print(f"\n❌ [系统致命异常] 引擎触发硬性熔断或发生底层崩溃: {e}")

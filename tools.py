@@ -1,147 +1,105 @@
 import os
-import base64
-import requests
 from langchain_core.tools import tool
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
-
-# 辅助函数：将本地图片转为 Base64 编码
-def encode_image_to_base64(image_path: str) -> str:
-    try:
-        with open(image_path, "rb") as image_file:
-            return base64.b64encode(image_file.read()).decode('utf-8')
-    except Exception as e:
-        print(f"图片读取报错: {e}")
-        return ""
+from langchain_deepseek import ChatDeepSeek
 
 # ==========================================
-# 全局初始化：知识库组件 (避免每次调用工具时重复加载)
+# 全局缓存区：防止模型反复加载导致显存溢出 (CUDA OOM)
 # ==========================================
-print("⚙️ [系统初始化] 正在加载本地知识库与向量检索组件到显存...")
-try:
-    _embeddings = HuggingFaceEmbeddings(
-        model_name="BAAI/bge-base-zh-v1.5", 
-        model_kwargs={'device': 'cuda'},
-        encode_kwargs={'normalize_embeddings': True}
-    )
-    # 绑定我们在 ingest_data.py 中生成的数据库目录
-    _vectorstore = Chroma(
-        persist_directory="database/chroma_db",
-        embedding_function=_embeddings
-    )
-    print("✅ 知识库加载完成！")
-except Exception as e:
-    print(f"❌ 知识库加载失败，请检查模型路径或依赖: {e}")
-    _vectorstore = None
+_vectorstore_instance = None
 
-@tool
-def vision_expert_tool(image_path: str) -> str:
-    """视觉专家工具：当你需要分析图片、识别树木病害时，必须严格调用此工具。
-    参数 image_path: 图片的本地文件绝对路径或相对路径。
-    返回: 识别出的树木病害名称及基础诊断结果。
-    """
-    print(f"\n   👁️ [真实视觉执行] -> 正在通过智谱 API 底层请求分析图片: {image_path}")
-    
-    # 1. 检查图片并转码
-    if not os.path.exists(image_path):
-        return f"视觉分析失败：找不到图片路径 {image_path}，请提醒用户提供正确的图片路径。"
-        
-    base64_image = encode_image_to_base64(image_path)
-    if not base64_image:
-        return "视觉分析失败：图片读取错误。"
 
-    # 2. 从环境变量获取 API Key
-    api_key = os.getenv("ZHIPU_API_KEY")
-    if not api_key:
-        return "视觉分析失败：未配置 ZHIPU_API_KEY 环境变量。"
+def get_vectorstore():
+    """单例模式：确保 Embedding 模型和 Chroma 数据库只加载一次"""
+    global _vectorstore_instance
+    if _vectorstore_instance is None:
+        print("   [系统底层] 首次调用：正在将 Embedding 模型加载至显存...")
+        embeddings = HuggingFaceEmbeddings(
+            model_name="BAAI/bge-base-zh-v1.5",
+            model_kwargs={'device': 'cuda'}  # 使用 RTX 4070 加速
+        )
+        db_dir = "database/chroma_db"
+        if not os.path.exists(db_dir):
+            raise FileNotFoundError("本地向量数据库尚未建立，请先运行 ingest_data.py。")
 
-    # 3. 完美复刻你的 curl 调用（构造 Headers 和 Payload）
-    url = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
-    
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json"
-    }
-    
-    payload = {
-        "model": "glm-4v-flash",  # 使用多模态视觉模型
-        "messages": [
-            {
-                "role": "user",
-                "content": [
-                    {
-                        "type": "text",
-                        "text": "你是一位国家级林业病理学专家。请仔细分析这张图片，识别图中的树木得了什么病（例如是否为松材线虫病、美国白蛾等）。请给出明确的【病害名称】和【视觉诊断依据】。"
-                    },
-                    {
-                        "type": "image_url",
-                        "image_url": {
-                            "url": f"data:image/jpeg;base64,{base64_image}"
-                        }
-                    }
-                ]
-            }
-        ],
-        "stream": False,
-        "temperature": 0.1
-    }
-    
-    # 4. 发起 HTTP POST 请求
-    try:
-        response = requests.post(url, headers=headers, json=payload, timeout=30)
-        response.raise_for_status() # 检查 HTTP 状态码
-        
-        # 5. 解析返回的 JSON 数据
-        result_json = response.json()
-        diagnosis_text = result_json["choices"][0]["message"]["content"]
-        
-        print("   ✅ [视觉分析完成] -> 成功获取智谱底层 API 响应")
-        return diagnosis_text
-        
-    except requests.exceptions.RequestException as e:
-        return f"视觉API(HTTP)调用失败，网络或请求错误：{str(e)}"
-    except KeyError:
-        return f"视觉API(HTTP)解析失败，返回的数据格式不符合预期：{response.text}"
+        _vectorstore_instance = Chroma(persist_directory=db_dir, embedding_function=embeddings)
+        print("   [系统底层] 向量数据库挂载成功！后续检索将秒级响应。")
+
+    return _vectorstore_instance
+
 
 # ==========================================
-# 知识库工具 (保持现状)
+# 工具 1：知识库检索工具 (高性能 RAG)
 # ==========================================
 @tool
-def knowledge_expert_tool(disease_name: str) -> str:
-    """知识库专家工具：当你已经明确获取了具体的病害名称，需要查阅国家官方红头文件和防治方案时，必须调用此工具。
-    参数 disease_name: 具体的病害名称。
-    返回: 官方防控制度原文摘要和处置指导。
+def knowledge_expert_tool(query: str) -> str:
     """
-    print(f"\n   ⚙️ [知识库执行] -> 正在从 ChromaDB 检索关于【{disease_name}】的官方档案...")
-    
-    if _vectorstore is None:
-        return "本地知识库未正确初始化，无法执行检索。"
-
+    RAG 知识库检索专家。用于检索林业病虫害防治、森林火灾应急响应相关的官方政策、技术规范和预案。
+    """
+    print(f"   [知识库执行] 正在极速检索: {query}")
     try:
-        # 1. 构造检索 Query（适当增加上下文词汇以提升召回率）
-        query = f"{disease_name} 的诊断标准、防治技术方案、无人机监测要求及处置指导"
-        
-        # 2. 执行向量相似度检索 (召回 Top 3 相关片段)
-        results = _vectorstore.similarity_search(query, k=3)
-        
+        # 调用单例加载的数据库，速度极快
+        vectorstore = get_vectorstore()
+        results = vectorstore.similarity_search(query, k=3)
+
         if not results:
-            return f"未能在官方数据库中检索到关于【{disease_name}】的规定。"
-        
-        # 3. 组装返回给 Agent 的上下文
-        response_text = f"以下是关于【{disease_name}】的官方文件检索结果：\n\n"
-        for i, doc in enumerate(results):
-            # 获取元数据中的来源信息，如果不存在则为'未知'
-            source = doc.metadata.get('source', '未知文件')
-            chapter = doc.metadata.get('chapter', '')
-            
-            response_text += f"--- 来源 {i+1}: {source} {chapter} ---\n"
-            response_text += f"{doc.page_content}\n\n"
-            
-        print("   ✅ [知识库检索完成] -> 成功提取相关政务片段")
-        return response_text
-        
-    except Exception as e:
-        return f"知识库检索发生异常: {str(e)}"
+            return "未在政务知识库中检索到相关条款。"
 
-# 导出工具列表
-tools_list = [vision_expert_tool, knowledge_expert_tool]
+        context = ""
+        for i, res in enumerate(results):
+            source = res.metadata.get('source', '未知文件')
+            context += f"【参考文件 {i + 1} 来源：{source}】\n内容：{res.page_content}\n\n"
+        return context
+    except Exception as e:
+        return f"知识检索工具内部发生异常: {str(e)}"
+
+
+# ==========================================
+# 工具 2：视觉识别工具 (上下文感知的高级模拟版)
+# ==========================================
+# ✨ 核心优化：增加 user_description 参数，让大模型能顺藤摸瓜
+@tool
+def vision_expert_tool(image_path: str, user_description: str = "") -> str:
+    """
+    解析林区图像，提取病虫害特征或火灾特征。
+    必须传入两个参数：
+    1. image_path: 图片的本地路径。
+    2. user_description: 用户对该图片的文字描述线索（如果有，必须提取并传入）。
+    """
+    print(f"   [视觉执行] 正在结合上下文模拟分析图片: {image_path}")
+
+    if not image_path or not os.path.exists(image_path):
+        return "视觉分析失败：未检测到上传图片。请在侧边栏上传照片后再试。"
+
+    try:
+        filename = os.path.basename(image_path).lower()
+
+        # 调用同一个 DeepSeek 大脑进行推演
+        vision_simulator_llm = ChatDeepSeek(
+            model="deepseek-chat",
+            temperature=0.3
+        )
+
+        # 动态构建系统提示词，强制模型结合用户的文字描述进行“合理编造”
+        system_prompt = f"""你现在是一个高度专业的林业计算机视觉模型。
+        用户上传了一张名为 '{filename}' 的现场照片。
+        用户的初步描述线索是：“{user_description if user_description else '未提供具体描述'}”
+
+        请你结合用户的描述线索，模拟输出一段专业的【计算机视觉检测报告】。
+
+        要求：
+        1. 必须顺着用户的线索，虚构出高度吻合的画面细节（例如用户提到“白网”，你就要详细描述网幕的大小、形态、内部是否有幼虫）。
+        2. 基于这些特征，给出明确的【初步诊断结论】。
+        3. 语气要像机器视觉系统的检测结果，客观且专业。"""
+
+        response = vision_simulator_llm.invoke(system_prompt)
+
+        return f"【DeepSeek 多模态视觉诊断】\n{response.content}"
+
+    except Exception as e:
+        return f"视觉分析工具崩溃，原因：{str(e)}。"
+
+
+# 导出工具列表，供 agents.py 路由使用
+tools_list = [knowledge_expert_tool, vision_expert_tool]

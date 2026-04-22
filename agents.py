@@ -6,6 +6,7 @@ from langchain_core.messages import HumanMessage
 from langgraph.types import Command
 from state import ReviewResult
 from state import AgentState, Plan
+from langgraph.graph import END 
 
 # ==========================================
 # 初始化阶段
@@ -18,6 +19,18 @@ planner_llm = ChatDeepSeek(
     max_retries=3
 )
 structured_planner = planner_llm.with_structured_output(Plan)
+
+from tools import tools_list
+
+# 1. 构建工具路由字典 (利用 LangChain tool 的 .name 属性)
+tool_map = {t.name: t for t in tools_list}
+
+# 2. 初始化底层执行器专属 LLM (建议 temperature 设为 0.1，保证参数提取的稳定性)
+executor_llm = ChatDeepSeek(
+    model="deepseek-chat",
+    temperature=0.1,
+    max_retries=3
+)
 
 # ==========================================
 # 全局规划者节点
@@ -136,7 +149,7 @@ def executor_node(state: AgentState) -> Command:
             )
         else:
             print("   ✅ [Executor] 所有子任务均已遍历完毕，跳出微循环。")
-            return Command(goto="critic_node")
+            return Command(update={}, goto="critic_node")   #152行有修改
 
     print(f"   -> 锁定就绪任务: [{next_task.task_id}] {next_task.task_name}")
 
@@ -237,23 +250,23 @@ def critic_node(state: AgentState) -> Command:
 
     task_results = state.get("task_results", {})
     current_loops = state.get("plan_loop_count", 0)
-    MAX_ALLOWABLE_LOOPS = 3  # 最多允许打回重试 3 次
+    MAX_ALLOWABLE_LOOPS = 2  # 最多允许打回重试 3 次
 
     # ---------------------------------------------------------
     # 防线一：业务优雅降级 (Soft Fallback) - 拦截无限死循环
     # 对应 PDF 第 13-14 页深度工程实践
     # ---------------------------------------------------------
-    if current_loops > MAX_ALLOWABLE_LOOPS:
-        print("   ⚠️ [Critic 降级] 达到最大打回次数，触发业务软着陆。")
+    if current_loops >= MAX_ALLOWABLE_LOOPS:
+        print(f"   ⚠️ [Critic 强制熔断] 已达到最大打回次数 ({MAX_ALLOWABLE_LOOPS})，触发业务软着陆。")
         fallback_warning = (
-            "【系统高级警报】经过多次深度检索分析，由于本地政务知识库未覆盖匹配文件，"
-            "系统无法完全构建具备红头文件支撑的合规报告。为保证响应时效，"
-            "以下为基于视觉诊断与大模型预训练数据生成的降级参考方案，请务必安排人工复核："
+            "【系统高级警报】经过深度检索分析，由于环境依赖缺失（如 RAG 异常）或政务知识库未覆盖，"
+            "系统无法完全构建具备 100% 红头文件支撑的合规报告。为保证响应时效，"
+            "以下为基于现有数据生成的降级参考方案，请务必安排人工复核："
         )
-        # 过滤掉状态重置的占位符
+        # 过滤占位符并聚合当前所有已获取到的碎片化结果
         draft = "\n".join([f"【任务 {k}】: {v}" for k, v in task_results.items() if k != "__RESET__"])
-        
-        # 强制流转至 Finalizer 输出阶段，中止无意义的死循环
+
+        # 强制流转至 Finalizer，切断回流到 Planner 的路径
         return Command(
             update={"messages": [("ai", f"{fallback_warning}\n\n{draft}")]},
             goto="finalizer_node"
