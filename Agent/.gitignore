@@ -1,0 +1,30 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments & Secrets
+.venv/
+.env
+/.claude/
+
+# Database
+database/
+
+# Models & Large Files (架构师终极防御)
+models/
+*.bin
+*.safetensors
+*.h5
+*.pt
+
+# Project tests are versioned; keep non-source cache/output files ignored.
+tests/*
+!tests/*.py
+!tests/test.jpg
+!tests/虫.jpg
+!tests/火火.jpg
+!tests/火灾2.jpg

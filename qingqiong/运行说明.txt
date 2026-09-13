@@ -1,0 +1,7 @@
+青穹林草智能分析系统 · Web 前端运行说明
+
+1. 按项目根目录 README.md 配置环境变量并启动 Agent 后端（127.0.0.1:8001）。
+2. 在 qingqiong 目录运行：python -m http.server 8000
+3. 浏览器访问：http://localhost:8000
+
+上传图片、输入分析需求并开始分析后，可查看真实 Agent Timeline 和最终报告，并导出报告。分析结论供辅助决策，需人工复核。

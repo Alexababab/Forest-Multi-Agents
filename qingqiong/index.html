@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#263222" />
+  <title>青穹林草智能分析系统</title>
+  <meta name="description" content="面向复杂林草场景的多模态多智能体协同分析与辅助决策系统。" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;600;700;900&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="page-progress" aria-hidden="true"><span id="pageProgress"></span></div>
+  <div class="ambient ambient-a"></div>
+  <div class="ambient ambient-b"></div>
+
+  <header class="site-header" id="siteHeader">
+    <a class="brand" href="#home" aria-label="青穹林草智能分析系统首页">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 48 48" role="img">
+          <path d="M8 27C16 10 32 8 40 9c-2 16-12 27-29 28" />
+          <path d="M13 34c8-9 15-14 26-19" />
+          <path d="M25 25c3 1 6 3 9 7" />
+        </svg>
+      </span>
+      <span class="brand-copy">
+        <b>青穹林草智能分析系统</b>
+        <small>QINGQIONG FORESTRY INTELLIGENCE</small>
+      </span>
+    </a>
+    <nav class="site-nav" aria-label="主导航">
+      <a href="#home">首页</a>
+      <a href="#analysis">图像分析</a>
+      <a href="#agents">智能体流程</a>
+      <a href="#insights">预警建议</a>
+      <a href="#report">分析报告</a>
+    </nav>
+    <a class="header-cta magnetic" href="#analysis"><span>进入系统</span><i>↘</i></a>
+    <button class="menu-toggle" id="menuToggle" aria-label="展开菜单"><span></span><span></span></button>
+  </header>
+
+  <main>
+    <section class="hero" id="home">
+      <div class="hero-backdrop" aria-hidden="true">
+        <img src="assets/practice-path.jpg" alt="" />
+        <div class="hero-grid"></div>
+        <div class="hero-shade"></div>
+      </div>
+
+      <div class="hero-content shell">
+        <div class="hero-topline reveal">
+          <span class="eyebrow-dot"></span>
+          林草场景智能分析 · 辅助决策
+          <span class="hero-coordinate">MULTIMODAL · MULTI-AGENT</span>
+        </div>
+
+        <div class="hero-layout">
+          <div class="hero-copy reveal">
+            <p class="section-kicker light">QINGQIONG FORESTRY INTELLIGENCE</p>
+            <h1>青穹林草<br><em>智能分析系统</em></h1>
+            <p class="hero-lead"><strong>面向复杂林草场景的多模态多智能体协同分析与辅助决策。</strong>上传场景影像，系统通过视觉感知、知识检索、质量审查与报告生成，形成可复核的分析结果。</p>
+            <div class="hero-actions">
+              <a class="btn btn-primary magnetic" href="#analysis"><span>开始分析</span><i>↘</i></a>
+              <a class="btn btn-ghost" href="#agents"><span>查看分析流程</span><i>→</i></a>
+            </div>
+          </div>
+
+          <aside class="hero-console glass reveal tilt" aria-label="系统运行状态">
+              <div class="console-head">
+              <div><small>ANALYSIS CONSOLE</small><b>等待分析</b></div>
+              <span class="live-pill"><i></i> READY</span>
+            </div>
+            <div class="console-visual">
+              <div class="orbit orbit-a"></div>
+              <div class="orbit orbit-b"></div>
+              <div class="radar-core"><span>AI</span></div>
+              <div class="orbit-dot dot-a"></div>
+              <div class="orbit-dot dot-b"></div>
+              <div class="orbit-dot dot-c"></div>
+            </div>
+            <div class="console-stages">
+              <div class="stage"><span>01</span><b>图像输入</b><small>等待</small></div>
+              <div class="stage"><span>02</span><b>协同分析</b><small>等待</small></div>
+              <div class="stage"><span>03</span><b>质量审查</b><small>等待</small></div>
+              <div class="stage"><span>04</span><b>报告生成</b><small>等待</small></div>
+            </div>
+            <p class="console-note">遥感影像 · 多智能体协同 · 报告生成</p>
+          </aside>
+        </div>
+
+        <div class="hero-metrics reveal">
+          <div><strong>多模态</strong><span>视觉感知</span></div>
+          <div><strong>知识增强</strong><span>政策检索</span></div>
+          <div><strong>协同流程</strong><span>任务规划与执行</span></div>
+          <div><strong>质量审查</strong><span>结果复核</span></div>
+        </div>
+      </div>
+      <a class="scroll-cue" href="#analysis" aria-label="向下滚动"><span>SCROLL TO EXPLORE</span><i>↓</i></a>
+    </section>
+
+    <section class="section analysis-section" id="analysis">
+      <div class="shell">
+        <div class="section-heading reveal">
+          <div>
+            <p class="section-kicker">IMAGE INPUT / 01</p>
+            <h2>分析工作区</h2>
+            <p class="section-subtitle">选择场景、说明关注重点，然后启动协同分析。</p>
+          </div>
+          <p>支持 JPG、JPEG、PNG 与 WEBP 图片。系统将结合视觉感知和林草知识库，生成真实执行轨迹与最终分析报告。</p>
+        </div>
+
+        <div class="analysis-board reveal">
+          <div class="image-workbench">
+            <div class="image-toolbar">
+              <div>
+                <span class="micro-label">CURRENT INPUT</span>
+                <b id="currentSceneLabel">SCENE 01 · 密林线廊</b>
+              </div>
+              <label class="upload-btn magnetic" for="imageUpload">
+                <input id="imageUpload" type="file" accept="image/*" hidden />
+                <span>上传图像</span><i>＋</i>
+              </label>
+            </div>
+            <div class="main-image-frame" id="dropZone">
+              <img id="mainImage" src="assets/scene-01.png" alt="当前遥感示例影像" />
+              <div class="scan-overlay" id="scanOverlay">
+                <span class="scan-line"></span>
+                <i class="corner c1"></i><i class="corner c2"></i><i class="corner c3"></i><i class="corner c4"></i>
+              </div>
+              <div class="image-hud hud-top"><span>RGB / UAV</span><span>512 × 512</span></div>
+              <div class="image-hud hud-bottom"><span id="hudScene">DENSE FOREST · LINE CORRIDOR</span><span class="hud-live"><i></i> READY</span></div>
+              <div class="drop-hint">拖放图片到此处</div>
+            </div>
+            <div class="image-actions">
+              <div class="input-file-meta"><b id="currentFileName">示例影像已选择</b><span>支持 JPG / JPEG / PNG / WEBP</span></div>
+              <div class="analysis-state"><i id="analysisStateDot"></i><span id="analysisStateText">分析数据已就绪</span></div>
+            </div>
+            <div class="prompt-workspace">
+              <div class="prompt-head"><div><span class="micro-label">ANALYSIS REQUEST</span><b>分析需求</b></div><small>可选</small></div>
+              <textarea id="analysisPrompt" rows="4" placeholder="请描述希望系统重点分析的问题，例如：分析该林区是否存在病虫害或火灾风险，并结合知识库给出处置建议。"></textarea>
+              <div class="prompt-presets" aria-label="分析需求快捷建议">
+                <button type="button" data-prompt="请对该林草场景进行综合分析，并结合知识库给出处置建议。">综合分析</button>
+                <button type="button" data-prompt="请重点研判该林草场景中的病虫害、火灾及其他生态风险。">风险研判</button>
+                <button type="button" data-prompt="请结合场景特征与知识库依据，重点给出治理和巡护建议。">治理建议</button>
+              </div>
+              <button class="btn btn-dark magnetic workspace-cta" id="runAnalysis"><span>开始智能分析</span><i>↗</i></button>
+            </div>
+          </div>
+
+          <div class="scene-library">
+            <div class="library-head">
+              <div><span class="micro-label">SCENE LIBRARY</span><b>林草场景影像库</b></div>
+              <span>06 IMAGES</span>
+            </div>
+            <div class="scene-grid" id="sceneGrid">
+              <button class="scene-card active" data-scene="0">
+                <img src="assets/scene-01.png" alt="示例影像1" />
+                <span><i>01</i><b>密林线廊</b></span>
+              </button>
+              <button class="scene-card" data-scene="1">
+                <img src="assets/scene-02.png" alt="示例影像2" />
+                <span><i>02</i><b>干草绿斑</b></span>
+              </button>
+              <button class="scene-card" data-scene="2">
+                <img src="assets/scene-03.png" alt="示例影像3" />
+                <span><i>03</i><b>斑驳冠层</b></span>
+              </button>
+              <button class="scene-card" data-scene="3">
+                <img src="assets/scene-04.png" alt="示例影像4" />
+                <span><i>04</i><b>草灌交错</b></span>
+              </button>
+              <button class="scene-card" data-scene="4">
+                <img src="assets/scene-05.png" alt="示例影像5" />
+                <span><i>05</i><b>浓密森林</b></span>
+              </button>
+              <button class="scene-card" data-scene="5">
+                <img src="assets/scene-06.png" alt="示例影像6" />
+                <span><i>06</i><b>健康林窗</b></span>
+              </button>
+            </div>
+            <div class="task-summary">
+            <div class="summary-status"><span class="status-ring"><i></i></span><div><small>CURRENT TASK</small><b>林草场景智能分析</b></div><em>等待分析</em></div>
+              <div class="summary-row"><span>处理方式</span><b>多智能体协同分析流程</b></div>
+              <div class="summary-row"><span>结果类型</span><b>协同研判 · 分析报告</b></div>
+              <div class="progress-track"><span id="taskProgress" style="width:0%"></span></div>
+              <p id="taskObservation">上传林草场景图片后，系统将在此展示智能分析结果。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section agent-section" id="agents">
+      <div class="shell">
+        <div class="section-heading inverse reveal">
+          <div>
+            <p class="section-kicker light">AGENT WORKFLOW / 02</p>
+            <h2>智能体流程</h2>
+            <p class="section-subtitle">真实工作流角色协同，把场景输入转化为可复核报告。</p>
+          </div>
+          <p>以下角色对应当前 LangGraph 工作流。角色卡展示系统职责，Timeline 展示本次分析实际发生的事件。</p>
+        </div>
+
+        <div class="agent-stage reveal">
+          <div class="agent-flow-line"><span></span></div>
+          <article class="agent-card tilt" data-role="planner">
+            <div class="agent-index">01</div><div class="agent-symbol">规</div>
+            <p>PLANNER</p><h3>任务规划</h3>
+            <span>拆解分析目标并生成可执行计划。</span>
+            <footer><b>STATUS</b><i data-agent-status>等待任务</i></footer>
+          </article>
+          <article class="agent-card tilt" data-role="executor">
+            <div class="agent-index">02</div><div class="agent-symbol">执</div>
+            <p>EXECUTOR</p><h3>任务执行</h3>
+            <span>调度任务并调用对应专业工具。</span>
+            <footer><b>STATUS</b><i data-agent-status>等待任务</i></footer>
+          </article>
+          <article class="agent-card tilt" data-role="vision">
+            <div class="agent-index">03</div><div class="agent-symbol">视</div>
+            <p>VISION EXPERT</p><h3>多模态感知</h3>
+            <span>识别林草场景中的视觉特征与异常。</span>
+            <footer><b>STATUS</b><i data-agent-status>等待任务</i></footer>
+          </article>
+          <article class="agent-card tilt" data-role="knowledge">
+            <div class="agent-index">04</div><div class="agent-symbol">知</div>
+            <p>KNOWLEDGE EXPERT</p><h3>知识检索</h3>
+            <span>检索林草知识库中的相关依据。</span>
+            <footer><b>STATUS</b><i data-agent-status>等待任务</i></footer>
+          </article>
+          <article class="agent-card tilt" data-role="critic">
+            <div class="agent-index">05</div><div class="agent-symbol">审</div>
+            <p>CRITIC</p><h3>质量审查</h3>
+            <span>检查证据充分性与分析质量。</span>
+            <footer><b>STATUS</b><i data-agent-status>等待任务</i></footer>
+          </article>
+          <article class="agent-card tilt" data-role="finalizer">
+            <div class="agent-index">06</div><div class="agent-symbol">报</div>
+            <p>FINALIZER</p><h3>报告生成</h3>
+            <span>整合分析结果并形成最终报告。</span>
+            <footer><b>STATUS</b><i data-agent-status>等待任务</i></footer>
+          </article>
+        </div>
+
+        <div class="agent-console reveal">
+          <div class="terminal-head"><span><i></i><i></i><i></i></span><b>QINGQIONG / MULTI-AGENT TRACE</b><em id="traceTime">WAITING</em></div>
+          <div class="terminal-body" id="agentTrace">
+            <p class="trace-empty">等待分析任务 · 真实 Agent 事件将在运行后显示</p>
+          </div>
+          <div class="human-node"><span>FINAL NODE</span><b>人工复核</b><small>辅助分析，不替代专业判断</small></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section insight-section" id="insights">
+      <div class="shell">
+        <div class="section-heading reveal">
+          <div>
+            <p class="section-kicker">ANALYSIS STATUS / 03</p>
+            <h2>分析状态</h2>
+            <p class="section-subtitle">实时了解当前多智能体协同分析进度与结果状态。</p>
+          </div>
+          <p>分析前保持空状态，运行中跟随真实 SSE 更新，完成后请直接查看下方智能分析报告。</p>
+        </div>
+
+        <div class="insight-layout">
+          <div class="health-panel reveal tilt">
+            <div class="panel-head"><div><span class="micro-label">ANALYSIS STATUS</span><h3 id="healthTitle">等待分析</h3></div><span class="quality-tag">辅助决策</span></div>
+            <div class="health-hero">
+              <div class="health-ring" id="healthRing" style="--score: 0">
+                <div><strong id="healthScore">—</strong><span id="statusGlyphLabel">ANALYSIS<br>STATUS</span></div>
+              </div>
+              <div class="health-stats">
+                <div><small>当前阶段</small><strong id="coverageValue">等待任务</strong></div>
+                <div><small>证据状态</small><strong id="greenValue">暂无证据</strong></div>
+                <div><small>报告状态</small><strong id="shadowValue">未生成</strong></div>
+              </div>
+            </div>
+            <p class="health-desc" id="vegetationText">上传图片并开始分析后，完整研判结果将在下方报告中展示。</p>
+          </div>
+
+          <div class="risk-panel reveal" hidden>
+            <div class="panel-head"><div><span class="micro-label">RISK MATRIX</span><h3>多角度生态风险预警</h3></div><span class="risk-level" id="overallRisk">中高风险</span></div>
+            <div class="risk-primary">
+              <small>PRIMARY ALERT</small>
+              <b id="primaryRisk">暂无分析结果</b>
+              <span id="riskIntro">系统完成分析后将提供风险研判，请以最终报告为准。</span>
+            </div>
+            <div class="risk-list" id="riskList"></div>
+          </div>
+        </div>
+
+        <div class="action-block reveal" hidden>
+          <div class="action-title">
+            <span class="section-kicker">ACTION LIST / 04</span>
+            <h3>生态治理与巡护建议</h3>
+            <p>将风险结果转化为能够落地的现场核查、日常巡护与长期治理动作。</p>
+          </div>
+          <div class="action-list" id="actionList"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section report-section" id="report">
+      <div class="shell">
+        <div class="section-heading inverse reveal">
+          <div>
+            <p class="section-kicker light">REPORT / 05</p>
+            <h2>分析报告</h2>
+            <p class="section-subtitle">汇总真实协同分析结果，形成可复核的智能分析报告。</p>
+          </div>
+          <p>报告区域只展示当前任务产生的真实 `final_report`，支持屏幕阅读、导出与人工复核。</p>
+        </div>
+
+        <div class="report-layout reveal">
+          <div class="report-controls">
+            <span class="micro-label light">REPORT CONTROL</span>
+            <h3>青穹林草智能分析报告</h3>
+            <p>当前场景：<b id="reportSceneName">密林 + 纵向线状设施</b></p>
+            <div class="report-meta">
+              <div><span>REPORT TYPE</span><b id="reportNo">AI ANALYSIS REPORT</b></div>
+              <div><span>STATUS</span><b class="ready-text" id="reportStatus">等待生成</b></div>
+              <div><span>REVIEW</span><b>人工复核</b></div>
+            </div>
+            <button class="btn btn-line" id="exportReport" hidden><span>导出分析报告 .TXT</span><i>↓</i></button>
+            <small class="report-disclaimer">分析结果支持人工复核与现场核查，建议结合多时相遥感、地面调查等信息进行综合研判。</small>
+          </div>
+
+          <article class="report-paper" id="reportPaper">
+            <header>
+              <div class="paper-brand"><span class="paper-mark">Q</span><div><b>青穹林草智能分析系统</b><small>QINGQIONG FORESTRY INTELLIGENCE</small></div></div>
+              <div class="paper-code"><span>AI ANALYSIS REPORT</span><b id="paperCode">—</b></div>
+            </header>
+            <div class="paper-rule"></div>
+            <div class="paper-title-row">
+              <div><small>林草生态图像辅助分析报告</small><h3 id="paperSceneTitle">密林线廊场景</h3></div>
+              <span id="paperStatus">等待生成</span>
+            </div>
+            <section><b>FINAL REPORT</b><div class="report-body" id="reportOverview">等待生成分析报告。</div></section>
+            <section hidden><b>02 / 植被状态</b><p id="reportVegetation"></p></section>
+            <section hidden><b>03 / 风险提示</b><p id="reportRisk"></p></section>
+            <section hidden><b>04 / 治理建议</b><p id="reportAction"></p></section>
+            <footer><span>生成节点：REPORTER AGENT</span><span>人工复核：待确认</span></footer>
+            <div class="paper-stamp">ECO<br>REPORT</div>
+            <div class="paper-loading" id="paperLoading"><i></i><b>AGENTS SUMMARIZING</b><span>正在汇总分析结论...</span></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section practice-section" id="practice" hidden>
+      <div class="shell">
+        <div class="section-heading reveal">
+          <div>
+            <p class="section-kicker">PRACTICE OUTCOMES / 06</p>
+            <h2>实践成果</h2>
+            <p class="section-subtitle">从影像研判到现场考察，让智能分析落回真实场景。</p>
+          </div>
+          <p>四组实地影像记录实践过程：团队现场、联合实践标识、千年秀林与林间样区，与 6 组无人机影像共同构成从空中观测到地面核查的完整素材链。</p>
+        </div>
+
+        <div class="practice-gallery reveal">
+          <figure class="practice-main tilt">
+            <img src="assets/practice-team.jpg" alt="实践团队合影" />
+            <figcaption><span>FIELD RECORD / 01</span><b>实践团队 · 雄安现场调研</b><p>实地观察与影像素材采集，为生态分析与场景核查提供现场支撑。</p></figcaption>
+          </figure>
+          <figure class="practice-card tilt">
+            <img src="assets/practice-sign.jpg" alt="中国雄安集团与北京林业大学联合实践标识" />
+            <figcaption><span>FIELD RECORD / 02</span><b>联合实践现场</b></figcaption>
+          </figure>
+          <figure class="practice-card tilt">
+            <img src="assets/practice-forest.jpg" alt="雄安千年秀林" />
+            <figcaption><span>FIELD RECORD / 03</span><b>千年秀林生态场景</b></figcaption>
+          </figure>
+          <figure class="practice-card wide tilt">
+            <img src="assets/practice-path.jpg" alt="林间道路生态场景" />
+            <figcaption><span>FIELD RECORD / 04</span><b>林间样区观察</b></figcaption>
+          </figure>
+        </div>
+
+        <div class="outcome-strip reveal">
+          <div><span>01</span><b>现场素材</b><p>无人机影像 + 实地照片</p></div>
+          <div><span>02</span><b>智能体流程</b><p>解析 / 植被 / 风险 / 治理 / 报告</p></div>
+          <div><span>03</span><b>网页成果</b><p>可运行、可截图、可演示</p></div>
+          <div><span>04</span><b>传播材料</b><p>PPT / 公众号 / 结项展示</p></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell footer-inner">
+      <div class="footer-brand">
+        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M8 27C16 10 32 8 40 9c-2 16-12 27-29 28"/><path d="M13 34c8-9 15-14 26-19"/></svg></span>
+        <div><b>青穹林草智能分析系统</b><small>QINGQIONG FORESTRY INTELLIGENCE</small></div>
+      </div>
+      <p>面向复杂林草场景的多模态多智能体协同分析与辅助决策<br><span>视觉感知 · 知识检索 · 质量审查 · 报告生成</span></p>
+      <a href="#home">回到顶部 ↑</a>
+    </div>
+  </footer>
+
+  <div class="analysis-modal" id="analysisModal" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-orbit"><span></span><i></i></div>
+      <small>MULTI-AGENT ANALYSIS</small>
+      <h3>协同研判进行中</h3>
+      <div class="modal-steps" id="modalSteps">
+        <div><span>01</span><b>任务规划</b><i></i></div>
+        <div><span>02</span><b>多模态感知</b><i></i></div>
+        <div><span>03</span><b>知识检索</b><i></i></div>
+        <div><span>04</span><b>质量审查</b><i></i></div>
+        <div><span>05</span><b>报告生成</b><i></i></div>
+      </div>
+      <div class="modal-progress"><span id="modalProgress"></span></div>
+      <p id="modalText">正在载入影像特征...</p>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"><i></i><span>分析完成，结果已同步更新</span></div>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -17,6 +17,9 @@ from agents import (
     finalizer_node
 )
 
+# 业务层已有 Planner/Critic/Executor 边界；该值仅作为异常 runaway 的最后保险。
+GRAPH_RECURSION_LIMIT = 64
+
 def build_forestry_graph():
     """
     构建并编译林草综合防护多智能体有向带环图
@@ -64,12 +67,16 @@ if __name__ == "__main__":
         # 触发 Reducer 的重置机制，确保累加器环境干净
         "completed_tasks": ["__RESET__"],
         "task_results": {"__RESET__": "__RESET__"},
-        "reflections": ["__RESET__"]
+        "reflections": ["__RESET__"],
+        "evidences": [],
+        "evidence_seq": 0,
+        "critic_verdict": None,
+        "finalizer_result": None,
     }
     
     # 架构级硬性熔断配置 (对应 PDF 第 13 页)
     config = {
-        "recursion_limit": 30 # 限制整个图的最大状态转移步数，防止 API 破产
+        "recursion_limit": GRAPH_RECURSION_LIMIT
     }
     
     try:

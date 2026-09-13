@@ -3,7 +3,7 @@ import os
 from langchain_core.messages import HumanMessage
 
 # 严格从你的后端文件导入编译好的图
-from graph import forestry_app
+from graph import forestry_app, GRAPH_RECURSION_LIMIT
 
 # ==========================================
 # 1. 页面配置与侧边栏
@@ -91,7 +91,11 @@ if prompt:
         "execution_step_count": 0,
         "completed_tasks": ["__RESET__"],
         "task_results": {"__RESET__": "__RESET__"},
-        "reflections": ["__RESET__"]
+        "reflections": ["__RESET__"],
+        "evidences": [],
+        "evidence_seq": 0,
+        "critic_verdict": None,
+        "finalizer_result": None,
     }
 
     final_report = ""
@@ -102,7 +106,7 @@ if prompt:
     with st.chat_message("assistant"):
         with st.status("🔍 智能体正在协同推理中...", expanded=True) as status:
             try:
-                for event in forestry_app.stream(initial_state, config={"recursion_limit": 30}):
+                for event in forestry_app.stream(initial_state, config={"recursion_limit": GRAPH_RECURSION_LIMIT}):
 
                     # --- 🧠 Planner ---
                     if "planner_node" in event:
